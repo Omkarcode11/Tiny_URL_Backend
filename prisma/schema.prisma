@@ -29,17 +29,21 @@ model Url {
   originalUrl String
   shortUrl    String
   userId      BigInt
-  user        User     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
-  visits      Visit[]
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("url")
+  @@unique([shortUrl])
 }
 
 model Visit {
   id         BigInt   @id @default(autoincrement())
   urlId      BigInt
   clickCount Int      @default(0)
-  url        Url      @relation(fields: [urlId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
+
+  @@unique([urlId])
+  @@map("visit")
 }
