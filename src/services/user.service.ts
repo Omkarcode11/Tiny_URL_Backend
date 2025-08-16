@@ -45,6 +45,25 @@ export class UserService {
         };
     }
 
+    public async getUserByEmail(email: string): Promise<UserResponse | null> {
+        const user = await prisma.user.findUnique({
+            where: {
+                email
+            }
+        });
+
+        if (!user) {
+            return null;
+        }
+
+        return {
+            id: user.id.toString(),
+            name: user.name,
+            email: user.email,
+            password: user.password
+        };
+    }
+
     public async updateUser(id: string, user: CreateUserInput): Promise<UserResponse> {
         const updatedUser = await prisma.user.update({
             where: {
