@@ -1,6 +1,7 @@
 import { UrlService } from "../services/url.service";
 import { Request, Response } from "express";
 import { createUrlSchema } from "../schemas/url.schema";
+import { generateUniqueShortUrl } from "../utils/shorturl.utils";
 
 interface AuthenticatedRequest extends Request {
     user?: { userId: string };
@@ -9,7 +10,7 @@ interface AuthenticatedRequest extends Request {
 export class UrlController {
     private static instance: UrlController;
     private urlService: UrlService;
-
+    
     private constructor() {
         this.urlService = UrlService.getInstance();
     }
@@ -23,7 +24,8 @@ export class UrlController {
 
     public async createUrl(req: AuthenticatedRequest, res: Response) {
         try {
-            const { originalUrl, shortUrl } = createUrlSchema.parse(req.body);
+            const { originalUrl } = createUrlSchema.parse(req.body);
+            const shortUrl = await generateUniqueShortUrl();
             const url = await this.urlService.createUrl({
                 originalUrl,
                 shortUrl,
@@ -48,9 +50,21 @@ export class UrlController {
     public async updateUrl(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { originalUrl, shortUrl } = createUrlSchema.parse(req.body);
+            const { originalUrl } = createUrlSchema.parse(req.body);
+            const shortUrl = await generateUniqueShortUrl();
             const url = await this.urlService.updateUrl({ id, originalUrl, shortUrl });
             res.status(200).json(url);
+        } catch (error: any) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    public async redirectToOriginalUrl(req: Request, res: Response) {
+        try {
+            const { shortUrl } = req.params;
+            const url = await this.urlService.getUrl(shortUrl);
+            await this.urlService.incrementClickCount(parseInt(url.id));
+            res.redirect(url.originalUrl);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }

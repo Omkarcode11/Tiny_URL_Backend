@@ -1,5 +1,5 @@
 import prisma from "../../db/connection";
-import { CreateUrlInput, CreateUrlResponse, UpdateUrlInput, UrlResponse } from "./url.types";
+import { CreateUrlInput, CreateUrlResponse, UpdateUrlInput, UrlResponse } from "../types/url.types";
 
 export class UrlService {
   private static instance: UrlService;
@@ -49,11 +49,26 @@ export class UrlService {
       throw new Error("Url not found");
     }
 
-    const visit = await prisma.visit.findUnique({
+    return {
+      id: url.id.toString(),
+      originalUrl: url.originalUrl,
+      shortUrl: url.shortUrl,
+      userId: url.userId.toString(),
+      createdAt: url.createdAt,
+      updatedAt: url.updatedAt,
+    };
+  }
+
+  public async getUrlByShortUrl(shortUrl: string): Promise<UrlResponse| null> {
+    const url = await prisma.url.findUnique({
       where: {
-        urlId: url.id,
+        shortUrl: shortUrl,
       },
     });
+
+    if (!url) {
+      return null
+    }
 
     return {
       id: url.id.toString(),
@@ -62,7 +77,6 @@ export class UrlService {
       userId: url.userId.toString(),
       createdAt: url.createdAt,
       updatedAt: url.updatedAt,
-      clickCount: visit?.clickCount || 0,
     };
   }
 
@@ -93,7 +107,19 @@ export class UrlService {
       userId: updatedUrl.userId.toString(),
       createdAt: updatedUrl.createdAt,
       updatedAt: updatedUrl.updatedAt,
-      clickCount: visit?.clickCount || 0,
     };
+  }
+
+  public async incrementClickCount(urlId: number) {
+    const url = await prisma.visit.update({
+      where: {
+        urlId: urlId,
+      },
+      data: {
+        clickCount: {
+          increment: 1,
+        },
+      },
+    });
   }
 }

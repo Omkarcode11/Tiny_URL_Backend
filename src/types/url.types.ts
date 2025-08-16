@@ -5,7 +5,6 @@ export interface UrlResponse {
     userId: string;
     createdAt: Date;
     updatedAt: Date;
-    clickCount: number;
 }
 
 export interface CreateUrlInput {   
