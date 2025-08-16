@@ -35,7 +35,11 @@ export class AuthService {
       throw new Error("Invalid password");
     }
 
-    let token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
+    let token = jwt.sign({ 
+      id: user.id.toString(), 
+      email: user.email,
+      name: user.name
+    }, process.env.JWT_SECRET!, {
       expiresIn: "1h",
     });
 
@@ -64,7 +68,11 @@ export class AuthService {
 
     const newUser = await this.userService.createUser(user);
 
-    let token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET!, {
+    let token = jwt.sign({ 
+      id: newUser.id.toString(),
+      email: newUser.email,
+      name: newUser.name
+    }, process.env.JWT_SECRET!, {
       expiresIn: "1h",
     });
 

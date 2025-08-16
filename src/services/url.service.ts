@@ -122,4 +122,34 @@ export class UrlService {
       },
     });
   }
+
+  public async getAllUrls(userId: string): Promise<UrlResponse[] | null> {
+    const urls = await prisma.url.findMany({
+      where: {
+        userId: parseInt(userId),
+      },
+    });
+
+    const visits = await prisma.visit.findMany({
+      where: {
+        urlId: {
+          in: urls.map((url) => url.id),
+        },
+      },
+    });
+
+    if (!urls) {
+      return null;
+    }
+
+    return urls.map((url) => ({
+      id: url.id.toString(),
+      originalUrl: url.originalUrl,
+      shortUrl: url.shortUrl, 
+      userId: url.userId.toString(),
+      createdAt: url.createdAt,
+      updatedAt: url.updatedAt,
+      clickCount: visits.find((visit) => visit.urlId === url.id)?.clickCount || 0,
+    }));
+  }
 }
