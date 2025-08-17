@@ -8,4 +8,7 @@ export interface AuthenticatedUser {
 
 export interface AuthenticatedRequest extends Request {
   user?: AuthenticatedUser;
+  params: any;
+  body: any;
+  headers: any;
 }
