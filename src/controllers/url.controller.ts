@@ -55,9 +55,16 @@ export class UrlController {
   public async getUrl(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
+      
+      if (!id) {
+        logger.warn('Missing URL ID parameter');
+        res.status(400).json({ error: 'URL ID is required' });
+        return;
+      }
+      
       logger.info(`Fetching URL with ID: ${id}`);
       
-      const url = await this.urlService.getUrl(id);
+      const url = await this.urlService.getUrl(id as string);
       logger.info(`URL fetched successfully: ${id}`);
       res.status(200).json(url);
     } catch (error: any) {
@@ -73,13 +80,20 @@ export class UrlController {
   public async updateUrl(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req.params;
+      
+      if (!id) {
+        logger.warn('Missing URL ID parameter');
+        res.status(400).json({ error: 'URL ID is required' });
+        return;
+      }
+      
       const { originalUrl } = createUrlSchema.parse(req.body);
       const shortUrl = await generateUniqueShortUrl();
       
       logger.info(`Updating URL: ${id}, new originalUrl: ${originalUrl}`);
       
       const url = await this.urlService.updateUrl({
-        id,
+        id: id as string,
         originalUrl,
         shortUrl,
       });
@@ -100,9 +114,16 @@ export class UrlController {
   public async redirectToOriginalUrl(req: AuthenticatedRequest, res: Response) {
     try {
       const { shortUrl } = req.params;
+      
+      if (!shortUrl) {
+        logger.warn('Missing short URL parameter');
+        res.status(400).json({ error: 'Short URL is required' });
+        return;
+      }
+      
       logger.info(`Redirect request for short URL: ${shortUrl}, IP: ${req.ip}`);
       
-      const url = await this.urlService.getUrl(shortUrl);
+      const url = await this.urlService.getUrl(shortUrl as string);
       await this.urlService.incrementClickCount(parseInt(url.id));
       
       logger.info(`Redirect successful: ${shortUrl} -> ${url.originalUrl}, click count incremented`);

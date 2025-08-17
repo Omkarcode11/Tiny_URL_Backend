@@ -156,15 +156,19 @@ export class AnalyticsService {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      activityMap.set(dateStr, 0);
+      if (dateStr) {
+        activityMap.set(dateStr, 0);
+      }
     }
 
     // Add actual click data (simplified - in real app you'd track individual clicks)
     urls.forEach(url => {
       if (url.visit && url.visit.clickCount > 0) {
         const dateStr = url.visit.updatedAt.toISOString().split('T')[0];
-        const current = activityMap.get(dateStr) || 0;
-        activityMap.set(dateStr, current + url.visit.clickCount);
+        if (dateStr) {
+          const current = activityMap.get(dateStr) || 0;
+          activityMap.set(dateStr, current + url.visit.clickCount);
+        }
       }
     });
 
@@ -187,15 +191,19 @@ export class AnalyticsService {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      trendsMap.set(dateStr, 0);
+      if (dateStr) {
+        trendsMap.set(dateStr, 0);
+      }
     }
 
     // Add actual click data
     urls.forEach(url => {
       if (url.visit && url.visit.clickCount > 0) {
         const dateStr = url.visit.updatedAt.toISOString().split('T')[0];
-        const current = trendsMap.get(dateStr) || 0;
-        trendsMap.set(dateStr, current + url.visit.clickCount);
+        if (dateStr) {
+          const current = trendsMap.get(dateStr) || 0;
+          trendsMap.set(dateStr, current + url.visit.clickCount);
+        }
       }
     });
 

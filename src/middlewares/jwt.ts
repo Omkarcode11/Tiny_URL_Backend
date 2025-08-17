@@ -2,10 +2,11 @@ import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AuthenticatedRequest } from "../types/express.types";
 
-export const verifyToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const verifyToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
+        res.status(401).json({ message: "Unauthorized" });
+        return;
     }
     
     try {
@@ -17,6 +18,7 @@ export const verifyToken = (req: AuthenticatedRequest, res: Response, next: Next
         };
         next();
     } catch (error) {
-        return res.status(401).json({ message: "Invalid token" });
+        res.status(401).json({ message: "Invalid token" });
+        return;
     }
 };
