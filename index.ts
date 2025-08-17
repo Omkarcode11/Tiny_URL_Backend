@@ -1,13 +1,43 @@
 import app from "./app";
-import prisma from "./db/connection";
+import logger from "./src/lib/logger";
 
-app.listen(3000, async () => {
-  try {
-    console.log("Connecting to database...");
-    await prisma.$connect();
-    console.log("Connected to database");
-    console.log("Server is running on port 3000");
-  } catch (error) {
-    console.error(error);
-  }
+const PORT = process.env.PORT || 3000;
+
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Server is running on port ${PORT}`);
+  logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`🌐 Server URL: http://localhost:${PORT}`);
+});
+
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    process.exit(0);
+  });
+});
+
+// Unhandled promise rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Uncaught exception handler
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  server.close(() => {
+    process.exit(1);
+  });
 });
