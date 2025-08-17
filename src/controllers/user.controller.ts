@@ -30,7 +30,13 @@ export class UserController {
   public async getUser(req: Request, res: Response) {
     try {
         const { id } = req.params;
-        const user = await this.userService.getUser(id);
+        
+        if (!id) {
+          res.status(400).json({ error: 'User ID is required' });
+          return;
+        }
+        
+        const user = await this.userService.getUser(id as string);
         res.status(200).json(user);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
@@ -40,8 +46,14 @@ export class UserController {
   public async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      
+      if (!id) {
+        res.status(400).json({ error: 'User ID is required' });
+        return;
+      }
+      
       const { name, email, password } = createUserSchema.parse(req.body);
-      const user = await this.userService.updateUser(id, {
+      const user = await this.userService.updateUser(id as string, {
         name,
         email,
         password,
